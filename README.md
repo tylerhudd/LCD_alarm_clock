@@ -54,7 +54,7 @@ Buttons change to:
 ## Authors
 
 * **Tyler Huddleston** - *Initial work* - [tylerhudd](https://github.com/tylerhudd)
-* **Georgi Genov**
+* **Georgi Genov** - *Initial work*
 
 ## Built With
 * Atmel Studio
