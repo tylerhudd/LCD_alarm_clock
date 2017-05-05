@@ -38,6 +38,7 @@ void incMin(int CorAorT, int set);		// increment clock or alarm mins
 void decMin(int CorAorT);				// decrement clock or alarm mins
 void toggleAMPM(int CorA);				// toggle am/pm
 int setTime(int CorA, int setState);	// set clock or alarm time
+void printTimer();						// print the timer time
 
 // global variables
 int state;
@@ -51,6 +52,7 @@ int alarmSec;
 int alarmAmpm;
 int timerMin;
 int timerSec;
+int runTimer;
 
 
 int main()
@@ -58,6 +60,7 @@ int main()
 	int stateSelect = 0;
 	int clockSetState = 0;
 	int alarmSetState = 0;
+	int timerSetState = 0;
 	
 	state = 0;
 	hr = 12;
@@ -70,6 +73,7 @@ int main()
 	alarmAmpm = 0;
 	timerMin = 0;
 	timerSec = 0;
+	runTimer = 0;
 	
 	
 	DDRB=0XFF;			// PORT B: data register for LCD set to output
@@ -87,6 +91,7 @@ int main()
 			STATE 4: Timer mode - set time, decrements minutes and seconds
 			STATE 5: Alarm - display alarm message
 		*/
+		
 		
 		switch(state)
 		{
@@ -134,12 +139,38 @@ int main()
 				break;
 				
 			case 3:	// stopwatch
+				
 				break;
 				
 			case 4:	// timer
+				if((PIND & 0x01) == 0x01 && timerMin > 0)	// if enter button pressed
+				{
+					runTimer = 1;
+				}
+				if(!runTimer)
+				{
+					if((PIND & 0x02) == 0x02)	// if increment button pressed
+					{
+						incMin(2, 0);
+					}
+					if((PIND & 0x04) == 0x04)	// if decrement button pressed
+					{
+						decMin(2);
+					}
+				}
+				printTimer();
 				break;
 			
 			case 5:	// sound the alarm
+				for(int i=0; i<10; i++)
+				{
+					lcd_cmd(0x01);
+					_delay_ms(500);
+					lcd_str("!!!!!!Alarm!!!!!!");
+					lcd_cmd(0xC0);
+					lcd_str("*!*!*!*!*!*!*!*!");
+					_delay_ms(500);
+				}
 				break;
 			
 			if(alarmHr == hr && alarmMin == min && alarmAmpm == ampm) state = 5;
@@ -361,11 +392,13 @@ int setTime(int CorA, int setState)
 		{
 			case 0:
 				lcd_cmd(0x01);
+				lcd_cmd(0x80);
 				lcd_str("Set minutes");
 				setState ++;
 				break;
 			case 1:
 				lcd_cmd(0x01);
+				lcd_cmd(0x80);
 				lcd_str("Set AM/PM");
 				setState ++;
 				break;
